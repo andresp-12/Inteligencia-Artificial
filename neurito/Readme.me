@@ -1,0 +1,51 @@
+Andres Ricardo Pacanchique Atuesta
+
+Experimentos
+1. Mantén dos necesidades fijas y varía la tercera. ¿Cuándo cambia la acción predicha?
+Rta: Al dejar la energia y el aburrimiento al 50% la accion predicha cambia cuando el hambre pasa del 40 al 50%. Pasa de jugar a comer.
+
+Compara prioridades casi iguales. ¿Cómo cambian las salidas de Softmax?
+Cuando las necesidades están balanceadas o casi iguales, la función Softmax distribuye la probabilidad de forma uniforme entre las tres opciones con un aproximado de 33% cada una.
+
+Cambia la capa oculta de 6 a 3, 10 o 20 neuronas; compara pérdida y precisión.
+Con 3 neuronas: Al reducir la capacidad del modelo, la pérdida final es más alta y la precisión disminuye. El modelo no tiene suficiente capacidad de representación para aprender la frontera de decisión óptima.
+Con 6 neuronas: Es un punto de equilibrio adecuado donde se logra una precisión alta con pocos parámetros.
+Con 10 y 20 neuronas: La pérdida disminuye más rápido y la precisión en el conjunto sintético aumenta ligeramente.
+
+Cambia las épocas o la tasa de aprendizaje. ¿El entrenamiento mejora, se estanca o se vuelve inestable?
+El incremento se estanca al ponerle una tasa de aprendiizaje baja como 0.001 y las epocas con 200
+
+¿Qué datos y etiquetas requeriría una cuarta acción?
+Para agregar una cuarta acción al modelo (por ejemplo: `"clean"` / `"limpiar"`), se requieren las siguientes modificaciones en datos, etiquetas y código:
+
+1. Nuevos Datos de Entrada:
+Entradas: Se necesitaría una cuarta variable de necesidad de entrada o reutilizar las existentes de forma combinada (por ejemplo, incluir un indicador de `Suciedad` / `Dirtiness`).
+Etiquetas: Modificar la función que genera las respuestas sintéticas en el dataset (`targets = np.argmax(...)`) para definir bajo qué combinación de necesidades la acción elegida debe ser la cuarta opción.
+
+2. Cambios en la Arquitectura de la Red Neural:
+Capa de Salida: Cambiar el número de neuronas de salida de 3 a 4. 
+`W2` pasa de `(N, 3)` a `(N, 4)`.
+`b2` pasa de `(1, 3)` a `(1, 4)`.
+Softmax: Aplicar Softmax sobre las 4 neuronas de salida para obtener una distribución de probabilidad que sume 100% entre las 4 acciones.
+
+3. Modificaciones en la Interfaz y Etiquetas:
+Agregar la nueva acción al vector de etiquetas: `actions = ("eat", "sleep", "play", "clean")`.
+Cargar las imágenes/animaciones correspondientes para la cuarta acción en el diccionario `frames` (ejemplo: `limpiar_1.png`, `limpiar_2.png`).
+
+
+Explica tus resultados
+
+1. ¿En qué se diferencian pesos y sesgos?
+Pesos: Representan la fuerza y dirección del impacto que tiene cada entrada (necesidad) sobre las neuronas. Un peso positivo grande hacia una acción significa que esa necesidad la favorece, mientras que un peso negativo la penaliza.
+Sesgos: Son términos independientes que permiten a las neuronas ajustar su umbral de activación sin depender directamente de que las entradas sean altas o cero. Permiten desplazar la función de activación para que la red tome decisiones equilibradas.
+
+2. ¿Por qué el cansancio es 1 - energía?
+Porque las entradas de la red neuronal deben representar niveles de necesidad normalizados entre 0.0 y 1.0. Si la energía es máxima (1.0), el estado de cansancio/necesidad de dormir es nulo (1 - 1.0 = 0.0). Si la energía se agota (0.0), la necesidad de dormir pasa a ser máxima (1 - 0.0 = 1.0).
+
+3. ¿Qué hace ReLU y qué hace Softmax?
+ReLU: Se usa en la capa oculta. Es una función de activación no lineal que transforma las entradas negativas en 0 y deja pasar las positivas intactas. Esto evita que el modelo sea solo una combinación lineal simple y le permite aprender fronteras de decisión complejas.
+Softmax: Se aplica en la capa de salida. Toma los valores numéricos directos de la red y los transforma en una distribución de probabilidades entre 0% y 100% (0.0 a 1.0) cuya suma total es siempre igual a 1.0.
+
+4. ¿Por qué una precisión alta puede ser engañosa?
+Memorización del dataset sintético: Una precisión del 98% o 100% sobre datos sintetizados mediante una regla matemática fija no garantiza que el modelo razone correctamente en situaciones reales impredecibles.
+Desequilibrio o simplicidad de la regla: La red puede aprender a acertar la mayoría de casos triviales y fallar justo en los puntos límite de cambio de comportamiento (zonas de alta incertidumbre o transición).
